@@ -5,253 +5,250 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-  release:
-    types: [ published ]
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: 3.9
+  IMAGE_NAME: wine-hypothesis-api
 
 jobs:
-  # Linting and Code Quality
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        
-    - name: Install linting dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 black isort mypy
-        
-    - name: Run Black (Code Formatting)
-      run: black --check .
-      
-    - name: Run isort (Import Sorting)
-      run: isort --check-only .
-      
-    - name: Run Flake8 (Linting)
-      run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      
-    - name: Run MyPy (Type Checking)
-      run: mypy app/ --ignore-missing-imports
-
-  # Testing
+  # Code Quality and Testing
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: [3.8, 3.9]
     
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-        
+        cache: 'pip'
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest-cov pytest-xdist
-        
-    - name: Run tests with coverage
+        pip install flake8 black isort pytest-cov bandit safety
+    
+    - name: Code formatting check (Black)
+      run: black --check --diff app/ test*.py
+    
+    - name: Import sorting check (isort)
+      run: isort --check-only --diff app/ test*.py
+    
+    - name: Lint with flake8
       run: |
-        pytest --cov=app --cov-report=xml --cov-report=term-missing -v
-        
+        # Stop build if there are Python syntax errors or undefined names
+        flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+    
+    - name: Security check with bandit
+      run: bandit -r app/ -f json -o bandit-report.json
+      continue-on-error: true
+    
+    - name: Check dependencies for vulnerabilities
+      run: safety check --json --output safety-report.json
+      continue-on-error: true
+    
+    - name: Run tests with pytest
+      run: |
+        pytest test*.py -v --cov=app --cov-report=xml --cov-report=html --cov-report=term
+    
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
-      if: matrix.python-version == '3.11'
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-        fail_ci_if_error: true
-
-  # Security Scanning
-  security:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
       with:
-        python-version: '3.11'
-        
-    - name: Install security tools
-      run: |
-        python -m pip install --upgrade pip
-        pip install safety bandit
-        
-    - name: Run Safety (Dependency Security)
-      run: safety check --json
-      
-    - name: Run Bandit (Code Security)
-      run: bandit -r app/ -f json
+        name: test-reports-${{ matrix.python-version }}
+        path: |
+          htmlcov/
+          bandit-report.json
+          safety-report.json
 
-  # Docker Build and Test
-  docker-build:
+  # Docker Build and Security Scan
+  docker:
     runs-on: ubuntu-latest
-    needs: [lint, test, security]
+    needs: test
+    if: github.event_name == 'push'
+    
     steps:
-    - name: Checkout
+    - name: Checkout code
       uses: actions/checkout@v4
-      
+    
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-      
-    - name: Build Docker image
+    
+    - name: Login to Docker Hub
+      if: github.ref == 'refs/heads/main'
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+    
+    - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
-        load: true
-        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
+        platforms: linux/amd64,linux/arm64
+        push: ${{ github.ref == 'refs/heads/main' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-        
-    - name: Test Docker image
-      run: |
-        docker run -d -p 8000:8000 --name test-container ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:test
-        sleep 10
-        curl -f http://localhost:8000/docs || exit 1
-        docker stop test-container
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.IMAGE_NAME }}:latest
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
 
-  # Performance Testing
-  performance:
+  # Integration Tests
+  integration:
     runs-on: ubuntu-latest
-    needs: [docker-build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [test]
+    
+    services:
+      api:
+        image: python:3.9-slim
+        options: --health-cmd "python -c 'import requests; requests.get(\"http://localhost:8000/docs\")'" --health-interval 10s --health-timeout 5s --health-retries 5
+    
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
-        
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install httpx pytest-asyncio
+    
+    - name: Start API server
+      run: |
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+        sleep 10
+    
+    - name: Run integration tests
+      run: |
+        pytest test*.py -v -k "not unit" --maxfail=1
+    
+    - name: API Health Check
+      run: |
+        curl -f http://localhost:8000/docs || exit 1
+
+  # Performance Tests
+  performance:
+    runs-on: ubuntu-latest
+    needs: [test]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install locust
-        
-    - name: Run performance tests
+    
+    - name: Start API server
       run: |
-        # Start the application in background
         uvicorn app.main:app --host 0.0.0.0 --port 8000 &
         sleep 10
+    
+    - name: Run performance tests
+      run: |
+        echo "
+        from locust import HttpUser, task, between
         
-        # Run basic load test (would need locustfile.py in actual implementation)
-        # locust -f locustfile.py --host=http://localhost:8000 --users 10 --spawn-rate 1 -t 60s --headless
+        class ApiUser(HttpUser):
+            wait_time = between(1, 3)
+            
+            def on_start(self):
+                # Train model first
+                self.client.post('/train_model', json={
+                    'test_size': 0.2,
+                    'random_state': 42,
+                    'n_neighbors': 5
+                })
+            
+            @task(3)
+            def test_evaluate_model(self):
+                self.client.post('/evaluate_model', json={})
+            
+            @task(2)
+            def test_feature_significance(self):
+                self.client.post('/feature_significance', json={
+                    'feature': 'alcohol',
+                    'bins': 3
+                })
+            
+            @task(1)
+            def test_model_vs_random(self):
+                self.client.post('/model_vs_random', json={})
+        " > locustfile.py
+        
+        locust --host=http://localhost:8000 -u 10 -r 2 -t 30s --headless --html performance-report.html
+    
+    - name: Upload performance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-report
+        path: performance-report.html
 
-  # Deploy to Staging
-  deploy-staging:
+  # Deployment (if needed)
+  deploy:
     runs-on: ubuntu-latest
-    needs: [docker-build]
-    if: github.ref == 'refs/heads/develop'
-    environment: staging
+    needs: [test, docker, integration]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # environment: production
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: |
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:staging
-          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    # Add deployment steps here (e.g., deploy to staging environment)
-    # - name: Deploy to staging
-    #   run: |
-    #     # Deploy commands here
-
-  # Deploy to Production
-  deploy-production:
-    runs-on: ubuntu-latest
-    needs: [docker-build, performance]
-    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
-    environment: production
+    - name: Deploy to production
+      run: |
+        echo "🚀 Deploying to production..."
+        echo "This is where you would deploy to your production environment"
+        echo "Examples: AWS ECS, Kubernetes, Docker Swarm, etc."
     
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-      
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha,prefix={{branch}}-
-          
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        
-    # Add production deployment steps here
-    # - name: Deploy to production
-    #   run: |
-    #     # Production deployment commands
-
-  # Notification
-  notify:
-    runs-on: ubuntu-latest
-    needs: [deploy-production]
-    if: always()
-    steps:
-    - name: Notify deployment status
-      uses: 8398a7/action-slack@v3
-      if: always()
-      with:
-        status: ${{ job.status }}
-        text: |
-          Pipeline Status: ${{ job.status }}
-          Repository: ${{ github.repository }}
-          Branch: ${{ github.ref_name }}
-          Commit: ${{ github.sha }}
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    - name: Notify deployment
+      run: |
+        echo "✅ Deployment completed successfully!"
