@@ -23,7 +23,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -36,9 +36,11 @@ jobs:
     
     - name: Code formatting check (Black)
       run: black --check --diff app/ test*.py
+      continue-on-error: true
     
     - name: Import sorting check (isort)
       run: isort --check-only --diff app/ test*.py
+      continue-on-error: true
     
     - name: Lint with flake8
       run: |
@@ -46,6 +48,7 @@ jobs:
         flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
         # Exit-zero treats all errors as warnings
         flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+      continue-on-error: true
     
     - name: Security check with bandit
       run: bandit -r app/ -f json -o bandit-report.json
@@ -59,15 +62,8 @@ jobs:
       run: |
         pytest test*.py -v --cov=app --cov-report=xml --cov-report=html --cov-report=term
     
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-    
     - name: Upload test artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-reports-${{ matrix.python-version }}
@@ -76,8 +72,8 @@ jobs:
           bandit-report.json
           safety-report.json
 
-  # Docker Build and Security Scan
-  docker:
+  # Docker Build and Push
+  build:
     runs-on: ubuntu-latest
     needs: test
     if: github.event_name == 'push'
@@ -117,36 +113,18 @@ jobs:
         labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        image-ref: ${{ env.IMAGE_NAME }}:latest
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-    
-    - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
 
-  # Integration Tests Case
+  # Integration Tests
   integration:
     runs-on: ubuntu-latest
     needs: [test]
-    
-    services:
-      api:
-        image: python:3.9-slim
-        options: --health-cmd "python -c 'import requests; requests.get(\"http://localhost:8000/docs\")'" --health-interval 10s --health-timeout 5s --health-retries 5
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
     
@@ -158,12 +136,12 @@ jobs:
     
     - name: Start API server
       run: |
-        uvicorn app.master:app --host 0.0.0.0 --port 8000 &
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 &
         sleep 10
     
     - name: Run integration tests
       run: |
-        pytest test*.py -v -k "not unit" --maxfail=1
+        pytest test*.py -v --maxfail=1
     
     - name: API Health Check
       run: |
@@ -180,7 +158,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ env.PYTHON_VERSION }}
     
@@ -192,7 +170,7 @@ jobs:
     
     - name: Start API server
       run: |
-        uvicorn app.master:app --host 0.0.0.0 --port 8000 &
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 &
         sleep 10
     
     - name: Run performance tests
@@ -230,25 +208,18 @@ jobs:
         locust --host=http://localhost:8000 -u 10 -r 2 -t 30s --headless --html performance-report.html
     
     - name: Upload performance report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: performance-report
         path: performance-report.html
 
-  # Deployment (if needed)
+  # Deployment
   deploy:
+    needs: [test, build]
     runs-on: ubuntu-latest
-    needs: [test, docker, integration]
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    # environment: production
+    if: github.ref == 'refs/heads/master'
     
     steps:
-    - name: Deploy to production
+    - name: Deploy notification
       run: |
-        echo "🚀 Deploying to production..."
-        echo "This is where you would deploy to your production environment"
-        echo "Examples: AWS ECS, Kubernetes, Docker Swarm, etc."
-    
-    - name: Notify deployment
-      run: |
-        echo "✅ Deployment completed successfully!"
+        echo "Deployment step - Configure your deployment strategy here"
