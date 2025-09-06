@@ -1,389 +1,440 @@
-# Hypothesis Testing in Machine Learning - Complete Guide
+# 🍷 Wine Classification with Hypothesis Testing API
 
-## Overview
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Python](https://img.shields.io/badge/python-3.8+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![Scikit-Learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=black)](https://docs.pytest.org)
 
-Hypothesis testing is a fundamental statistical method used to make decisions about population parameters based on sample data. In machine learning, it helps validate model performance, feature significance, and statistical assumptions underlying our algorithms.
+A comprehensive FastAPI application that combines machine learning with statistical hypothesis testing for wine classification. This project demonstrates how to train a K-Nearest Neighbors (KNN) classifier on the Wine dataset and perform various statistical tests to validate model performance and feature significance.
 
-## Core Concepts
+## 🎯 Project Overview
+
+This application serves as both a machine learning service and a statistical analysis tool, providing:
+
+- **Machine Learning**: KNN classifier training and evaluation on the Wine dataset
+- **Hypothesis Testing**: Multiple statistical tests to validate ML assumptions and feature importance
+- **REST API**: Clean, documented endpoints for all operations
+- **Statistical Validation**: Comprehensive testing framework for model reliability
+
+## 📊 Hypothesis Testing in Machine Learning
 
 ### What is Hypothesis Testing?
 
-Hypothesis testing is a systematic procedure that uses sample data to evaluate hypotheses about population parameters. It involves:
+Hypothesis testing is a statistical method used to make inferences about population parameters based on sample data. In machine learning, it helps us:
 
-1. **Null Hypothesis (H₀)**: The default assumption (no effect/difference)
-2. **Alternative Hypothesis (H₁)**: The claim we want to test
-3. **Test Statistic**: A value calculated from sample data
-4. **P-value**: Probability of observing the test statistic under H₀
-5. **Significance Level (α)**: Threshold for rejecting H₀ (commonly 0.05)
+- **Validate Model Performance**: Ensure models perform better than random chance
+- **Feature Selection**: Identify statistically significant features
+- **Model Reliability**: Test consistency across different data splits
+- **Statistical Significance**: Quantify confidence in our findings
 
-### Decision Rules
-
-- **Reject H₀**: If p-value ≤ α (statistically significant)
-- **Fail to Reject H₀**: If p-value > α (not statistically significant)
-
-## Hypothesis Testing Workflow
+### The Hypothesis Testing Process
 
 ```mermaid
 flowchart TD
-    A[Define Problem] --> B[Formulate Hypotheses]
-    B --> C{Choose Test Type}
-    C --> D[Chi-Square Test<br/>Categorical Data]
-    C --> E[T-Test<br/>Continuous Data]
-    C --> F[ANOVA<br/>Multiple Groups]
-    C --> G[Correlation Test<br/>Relationship]
-    D --> H[Calculate Test Statistic]
-    E --> H
-    F --> H
-    G --> H
-    H --> I[Calculate P-value]
-    I --> J{P-value ≤ α?}
-    J -->|Yes| K[Reject H₀<br/>Significant Result]
-    J -->|No| L[Fail to Reject H₀<br/>Not Significant]
-    K --> M[Interpret Results]
-    L --> M
-    M --> N[Make Decision]
+    A[Define Null Hypothesis H₀] --> B[Define Alternative Hypothesis H₁]
+    B --> C[Choose Significance Level α = 0.05]
+    C --> D[Select Appropriate Statistical Test]
+    D --> E[Calculate Test Statistic]
+    E --> F[Calculate P-value]
+    F --> G{P-value < α?}
+    G -->|Yes| H[Reject H₀<br/>Accept H₁<br/>Result is Significant]
+    G -->|No| I[Fail to Reject H₀<br/>Result is Not Significant]
     
-    style K fill:#e1f5fe
-    style L fill:#fff3e0
-    style M fill:#f3e5f5
+    style A fill:#e1f5fe
+    style H fill:#c8e6c9
+    style I fill:#ffcdd2
 ```
 
-## Wine KNN Project Architecture
+### Types of Hypothesis Tests Used in This Project
+
+```mermaid
+mindmap
+  root((Hypothesis Tests))
+    Feature Analysis
+      Chi-squared Test
+        Independence test
+        Feature vs Target
+      Correlation Tests
+        Pearson Correlation
+        Spearman Correlation
+      Normality Tests
+        Shapiro-Wilk Test
+    Model Validation
+      Binomial Test
+        Model vs Random
+        Performance Validation
+      Permutation Test
+        Feature Importance
+        Statistical Significance
+    Multivariate Analysis
+      MANOVA
+        Multiple Features
+        Joint Significance
+      Interaction Tests
+        Feature Interactions
+        Combined Effects
+    Model Consistency
+      Cross-Validation
+        Performance Stability
+        ANOVA Test
+```
+
+## 🏗️ System Architecture
 
 ```mermaid
 graph TB
+    subgraph "Client Layer"
+        C[HTTP Clients]
+        D[Web Browser]
+        E[API Testing Tools]
+    end
+    
+    subgraph "API Layer"
+        F[FastAPI Application]
+        G[Pydantic Models]
+        H[Request Validation]
+    end
+    
+    subgraph "Business Logic Layer"
+        I[ML Utils Module]
+        J[Visualization Module]
+        K[Statistical Tests]
+    end
+    
     subgraph "Data Layer"
-        WD[Wine Dataset<br/>178 samples, 13 features]
-        SC[StandardScaler<br/>Feature Normalization]
+        L[Wine Dataset]
+        M[Trained Models]
+        N[Statistical Results]
     end
     
-    subgraph "ML Pipeline"
-        TS[Train/Test Split<br/>80/20]
-        KNN[KNN Classifier<br/>k=5 neighbors]
-        EVAL[Model Evaluation<br/>Accuracy, Precision, Recall]
+    subgraph "External Libraries"
+        O[Scikit-Learn]
+        P[SciPy Stats]
+        Q[Statsmodels]
+        R[Pandas/NumPy]
     end
     
-    subgraph "Hypothesis Testing Suite"
-        CHI[Chi-Square Test<br/>Feature Significance]
-        CORR[Correlation Test<br/>Feature Relationships]
-        NORM[Shapiro-Wilk Test<br/>Normality Testing]
-        BINOM[Binomial Test<br/>Model vs Random]
-        PERM[Permutation Test<br/>Feature Importance]
-        MANOVA[MANOVA Test<br/>Feature Combinations]
-        INTER[Interaction Test<br/>Feature Interactions]
-        CONSIST[Consistency Test<br/>Cross-validation]
-    end
+    C --> F
+    D --> F
+    E --> F
+    F --> G
+    F --> H
+    H --> I
+    I --> J
+    I --> K
+    K --> L
+    K --> M
+    K --> N
+    I --> O
+    K --> P
+    K --> Q
+    I --> R
     
-    subgraph "API Endpoints"
-        FAST[FastAPI Server<br/>RESTful Endpoints]
-        VAL[Pydantic Validation<br/>Input Validation]
-    end
-    
-    WD --> SC
-    SC --> TS
-    TS --> KNN
-    KNN --> EVAL
-    
-    EVAL --> CHI
-    EVAL --> CORR
-    EVAL --> NORM
-    EVAL --> BINOM
-    EVAL --> PERM
-    EVAL --> MANOVA
-    EVAL --> INTER
-    EVAL --> CONSIST
-    
-    CHI --> FAST
-    CORR --> FAST
-    NORM --> FAST
-    BINOM --> FAST
-    PERM --> FAST
-    MANOVA --> FAST
-    INTER --> FAST
-    CONSIST --> FAST
-    
-    FAST --> VAL
-    
-    style WD fill:#e8f5e8
-    style KNN fill:#e3f2fd
-    style FAST fill:#fce4ec
+    style F fill:#4CAF50
+    style I fill:#2196F3
+    style K fill:#FF9800
 ```
 
-## Hypothesis Tests in Wine KNN Project
+## 🧪 Hypothesis Testing Implementation
 
-### 1. Feature Significance Test (Chi-Square)
+### 1. Feature Significance Testing (Chi-squared)
+
+**Hypothesis:**
+- H₀: Feature is independent of wine class
+- H₁: Feature is dependent on wine class
+
 ```python
 # Example: Test if alcohol content affects wine classification
 {
-  "feature": "alcohol",
-  "bins": 5
+    "feature": "alcohol",
+    "bins": 5
 }
 ```
-- **H₀**: Alcohol content is independent of wine class
-- **H₁**: Alcohol content is associated with wine class
-- **Use Case**: Identify discriminative features
 
-### 2. Feature Correlation Test
+### 2. Feature Correlation Testing
+
+**Hypothesis:**
+- H₀: No correlation between features (ρ = 0)
+- H₁: Significant correlation exists (ρ ≠ 0)
+
 ```python
 # Example: Test correlation between alcohol and color intensity
 {
-  "f1": "alcohol",
-  "f2": "color_intensity", 
-  "method": "pearson"
+    "f1": "alcohol",
+    "f2": "color_intensity",
+    "method": "pearson"
 }
 ```
-- **H₀**: No correlation exists between features
-- **H₁**: Significant correlation exists
-- **Use Case**: Feature redundancy detection
 
-### 3. Normality Test (Shapiro-Wilk)
+### 3. Model Performance vs Random
+
+**Hypothesis:**
+- H₀: Model accuracy = Random chance accuracy
+- H₁: Model accuracy > Random chance accuracy
+
+### 4. Feature Importance Validation
+
+Uses permutation testing to validate statistical significance of feature contributions.
+
+### 5. Multivariate Analysis (MANOVA)
+
+**Hypothesis:**
+- H₀: All feature means are equal across classes
+- H₁: At least one feature mean differs across classes
+
+## 📋 Statistical Libraries and Functions
+
+### Core Libraries Used
+
+| Library | Purpose | Key Functions |
+|---------|---------|---------------|
+| **SciPy.stats** | Statistical tests | `chi2_contingency()`, `pearsonr()`, `spearmanr()`, `shapiro()`, `binom_test()` |
+| **Statsmodels** | Advanced statistics | `MANOVA()`, `ols()`, likelihood ratio tests |
+| **Scikit-learn** | ML algorithms | `KNeighborsClassifier()`, `permutation_importance()`, `train_test_split()` |
+| **Pandas** | Data manipulation | `crosstab()`, `qcut()`, data preprocessing |
+
+### Predefined Hypothesis Testing Functions
+
+Our implementation includes these statistical test functions:
+
 ```python
-# Example: Test if residual sugar follows normal distribution
-{
-  "feature": "residual_sugar"
-}
-```
-- **H₀**: Feature follows normal distribution
-- **H₁**: Feature does not follow normal distribution
-- **Use Case**: Validate parametric test assumptions
+# Individual feature tests
+single_feature_chi2(feature, bins)          # Chi-squared independence
+feature_correlation(f1, f2, method)         # Correlation significance
+feature_normality(feature)                  # Shapiro-Wilk normality
 
-### 4. Model vs Random Performance
-```python
-# No input required - uses trained model
-{}
-```
-- **H₀**: Model performs no better than random guessing
-- **H₁**: Model performs significantly better than chance
-- **Use Case**: Validate model effectiveness
+# Model validation tests
+model_vs_random_test()                       # Binomial test
+feature_importance_permutation()             # Permutation test
 
-### 5. Feature Importance Test
-```python
-# Permutation-based importance testing
-{}
-```
-- **H₀**: Feature has no predictive importance
-- **H₁**: Feature contributes significantly to predictions
-- **Use Case**: Feature selection and model interpretation
-
-### 6. Feature Combination Test (MANOVA)
-```python
-# Example: Test multiple features jointly
-{
-  "features": ["alcohol", "color_intensity", "pH"]
-}
-```
-- **H₀**: Features jointly do not discriminate between classes
-- **H₁**: Features jointly discriminate between classes
-- **Use Case**: Multivariate feature analysis
-
-### 7. Feature Interaction Test
-```python
-# Example: Test interaction between alcohol and color intensity
-{
-  "f1": "alcohol",
-  "f2": "color_intensity"
-}
-```
-- **H₀**: No interaction effect between features
-- **H₁**: Significant interaction effect exists
-- **Use Case**: Identify feature synergies
-
-### 8. Model Consistency Test
-```python
-# Example: Test performance consistency across folds
-{
-  "n_splits": 5
-}
-```
-- **H₀**: Model performance is consistent across different data splits
-- **H₁**: Model performance varies significantly
-- **Use Case**: Assess model stability
-
-## Statistical Testing Framework
-
-```mermaid
-classDiagram
-    class HypothesisTest {
-        +null_hypothesis: str
-        +alternative_hypothesis: str
-        +test_statistic: float
-        +p_value: float
-        +significance_level: float
-        +result: str
-        +calculate_test_statistic()
-        +calculate_p_value()
-        +make_decision()
-    }
-    
-    class ChiSquareTest {
-        +contingency_table: array
-        +degrees_freedom: int
-        +calculate_chi2()
-    }
-    
-    class CorrelationTest {
-        +method: str
-        +correlation_coefficient: float
-        +calculate_pearson()
-        +calculate_spearman()
-    }
-    
-    class NormalityTest {
-        +shapiro_statistic: float
-        +test_normality()
-    }
-    
-    class BinomialTest {
-        +successes: int
-        +trials: int
-        +probability: float
-        +test_performance()
-    }
-    
-    HypothesisTest <|-- ChiSquareTest
-    HypothesisTest <|-- CorrelationTest
-    HypothesisTest <|-- NormalityTest
-    HypothesisTest <|-- BinomialTest
+# Multivariate tests
+feature_combination_manova(features)         # MANOVA
+feature_interaction_test(f1, f2)            # Interaction effects
+model_consistency_tests(n_splits)           # Cross-validation ANOVA
 ```
 
-## Libraries for Hypothesis Testing
+## 🔧 API Endpoints
 
-### Core Statistical Libraries
+### Core Machine Learning Endpoints
 
-1. **SciPy (scipy.stats)**
-   - `chi2_contingency()`: Chi-square test for independence
-   - `pearsonr()`, `spearmanr()`: Correlation tests
-   - `shapiro()`: Normality testing
-   - `binom_test()`: Binomial testing
-   - `f_oneway()`: One-way ANOVA
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/train_model` | Train KNN classifier with custom parameters |
+| POST | `/evaluate_model` | Evaluate model performance metrics |
 
-2. **StatsModels**
-   - `MANOVA`: Multivariate analysis of variance
-   - `ols()`: Ordinary least squares regression
-   - Advanced statistical modeling
+### Hypothesis Testing Endpoints
 
-3. **Scikit-learn**
-   - `permutation_importance()`: Feature importance testing
-   - `cross_val_score()`: Cross-validation metrics
-   - `train_test_split()`: Data splitting
+| Method | Endpoint | Description | Statistical Test |
+|--------|----------|-------------|------------------|
+| POST | `/feature_significance` | Test feature independence | Chi-squared |
+| POST | `/feature_correlation` | Test feature correlation | Pearson/Spearman |
+| POST | `/feature_normality` | Test feature normality | Shapiro-Wilk |
+| POST | `/model_vs_random` | Test model vs chance | Binomial |
+| POST | `/feature_importance` | Test feature importance | Permutation |
+| POST | `/feature_combination` | Test multiple features | MANOVA |
+| POST | `/feature_interaction` | Test feature interactions | Likelihood Ratio |
+| POST | `/model_consistency` | Test model stability | ANOVA |
 
-### Specialized Libraries
+## 🚀 Getting Started
 
-4. **Pingouin**
-   - User-friendly statistical functions
-   - Effect size calculations
-   - Multiple comparison corrections
+### Prerequisites
 
-5. **PyMC3/PyMC4**
-   - Bayesian hypothesis testing
-   - Probabilistic programming
+- Python 3.8+
+- pip or conda
+- Git
 
-6. **Seaborn/Matplotlib**
-   - Statistical data visualization
-   - Hypothesis test result plotting
+### Installation
 
-## Predefined Functions for Hypothesis Testing
-
-### SciPy Statistical Tests
-```python
-from scipy.stats import (
-    chi2_contingency,    # Chi-square independence test
-    pearsonr, spearmanr, # Correlation tests
-    shapiro,            # Normality test
-    binom_test,         # Binomial test
-    ttest_ind,          # Independent t-test
-    ttest_rel,          # Paired t-test
-    mannwhitneyu,       # Mann-Whitney U test
-    wilcoxon,           # Wilcoxon signed-rank test
-    kruskal,            # Kruskal-Wallis H test
-    f_oneway,           # One-way ANOVA
-    levene,             # Levene's test for equal variances
-    bartlett,           # Bartlett's test for equal variances
-    anderson,           # Anderson-Darling normality test
-    kstest,             # Kolmogorov-Smirnov test
-    fisher_exact        # Fisher's exact test
-)
+1. **Clone the repository:**
+```bash
+git clone <repository-url>
+cd wine-hypothesis-testing
 ```
 
-### StatsModels Functions
-```python
-from statsmodels.stats import (
-    contingency_tables,  # Contingency table tests
-    multitest,          # Multiple testing corrections
-    power,              # Statistical power analysis
-    weightstats         # Weighted statistics
-)
-from statsmodels.multivariate.manova import MANOVA
-from statsmodels.formula.api import ols
+2. **Create and activate virtual environment:**
+```bash
+python -m venv venv
+
+# On Windows
+venv\Scripts\activate
+
+# On macOS/Linux
+source venv/bin/activate
 ```
 
-### Scikit-learn Testing Functions
-```python
-from sklearn.inspection import permutation_importance
-from sklearn.model_selection import (
-    cross_val_score,
-    permutation_test_score,
-    validation_curve,
-    learning_curve
-)
-from sklearn.feature_selection import (
-    chi2,               # Chi-square feature selection
-    f_classif,          # F-test for classification
-    mutual_info_classif # Mutual information
-)
+3. **Install dependencies:**
+```bash
+pip install -r requirements.txt
 ```
 
-## Common Hypothesis Testing Patterns
-
-### 1. A/B Testing Pattern
-```python
-def ab_test(control_group, treatment_group):
-    """Compare two groups for significant difference"""
-    statistic, p_value = ttest_ind(control_group, treatment_group)
-    return {
-        'statistic': statistic,
-        'p_value': p_value,
-        'significant': p_value < 0.05
-    }
+4. **Start the application:**
+```bash
+uvicorn app.main:app --reload --port 8000
 ```
 
-### 2. Feature Selection Pattern
-```python
-def select_significant_features(X, y, alpha=0.05):
-    """Select features based on statistical significance"""
-    chi2_scores, p_values = chi2(X, y)
-    significant_features = p_values < alpha
-    return X[:, significant_features], p_values
+5. **Access the API documentation:**
+```
+http://127.0.0.1:8000/docs
 ```
 
-### 3. Model Comparison Pattern
-```python
-def compare_models(model1, model2, X, y, cv=5):
-    """Compare two models using cross-validation"""
-    scores1 = cross_val_score(model1, X, y, cv=cv)
-    scores2 = cross_val_score(model2, X, y, cv=cv)
-    statistic, p_value = ttest_rel(scores1, scores2)
-    return p_value < 0.05  # True if models differ significantly
+## 📋 Usage Examples
+
+### Training a Model
+
+```bash
+curl -X POST "http://127.0.0.1:8000/train_model" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "test_size": 0.2,
+       "random_state": 42,
+       "n_neighbors": 5
+     }'
 ```
 
-## Pytest in Machine Learning Testing
+### Testing Feature Significance
 
-Pytest is a powerful testing framework that plays a crucial role in ensuring the reliability and correctness of machine learning pipelines. In ML projects, where data processing, model training, and statistical analysis involve complex operations, pytest provides a systematic way to validate each component. It offers fixtures for setting up test data and trained models, parametrized tests for validating multiple scenarios (different hyperparameters, datasets, or statistical tests), and clear assertion mechanisms for checking expected outcomes. Pytest's ability to handle both unit tests (individual functions) and integration tests (entire ML pipelines) makes it invaluable for catching bugs early, ensuring reproducibility, and maintaining code quality. In the context of hypothesis testing APIs, pytest validates that statistical tests return correct p-values, handle edge cases gracefully, and maintain consistent behavior across different input scenarios, thereby building confidence in the statistical conclusions drawn from ML models.
+```bash
+curl -X POST "http://127.0.0.1:8000/feature_significance" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "feature": "alcohol",
+       "bins": 5
+     }'
+```
 
-## Benefits of Hypothesis Testing in ML
+### Testing Feature Correlation
 
-1. **Validation**: Confirm that observed patterns are not due to chance
-2. **Feature Selection**: Identify statistically significant predictors
-3. **Model Comparison**: Choose between competing models objectively
-4. **Assumption Checking**: Validate underlying statistical assumptions
-5. **Risk Management**: Quantify uncertainty in predictions
-6. **Scientific Rigor**: Ensure reproducible and reliable results
+```bash
+curl -X POST "http://127.0.0.1:8000/feature_correlation" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "f1": "alcohol",
+       "f2": "color_intensity",
+       "method": "pearson"
+     }'
+```
 
-## Best Practices
+## 🧪 Testing with Pytest
 
-1. **Multiple Testing Correction**: Use Bonferroni or FDR correction
-2. **Effect Size**: Consider practical significance beyond statistical significance  
-3. **Power Analysis**: Ensure adequate sample size for reliable tests
-4. **Assumption Validation**: Check test prerequisites before application
-5. **Cross-validation**: Use robust validation strategies
-6. **Documentation**: Clearly document hypotheses and interpretations
+**Pytest** is a mature, feature-rich testing framework for Python that makes it easy to write simple and scalable test cases. In this project, we use pytest for comprehensive API testing because it offers several advantages:
+
+Pytest excels in API testing scenarios due to its powerful fixtures, parametrization capabilities, and clear assertion introspection. Our test suite validates both the correctness of statistical computations and the robustness of API endpoints under various input conditions. The framework's ability to handle async operations and provide detailed failure reports makes it ideal for testing complex ML pipelines where understanding test failures is crucial for debugging statistical algorithms. Additionally, pytest's plugin ecosystem allows integration with coverage tools, making it easy to ensure comprehensive test coverage across all hypothesis testing functions.
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest test_hypothesis.py
+
+# Run with coverage
+pytest --cov=app tests/
+
+# Run tests quietly
+pytest -q
+```
+
+## 🐳 Docker Support
+
+### Building and Running with Docker
+
+```bash
+# Build the Docker image
+docker build -t wine-hypothesis-api .
+
+# Run the container
+docker run -p 8000:8000 wine-hypothesis-api
+
+# Run with environment variables
+docker run -p 8000:8000 -e DEBUG=true wine-hypothesis-api
+```
+
+### Docker Compose (Optional)
+
+```bash
+# Start services
+docker-compose up
+
+# Start in detached mode
+docker-compose up -d
+
+# Stop services
+docker-compose down
+```
+
+## 🔄 CI/CD Pipeline
+
+The project includes GitHub Actions workflow for:
+
+- **Automated Testing**: Run pytest on every push/PR
+- **Code Quality**: Linting with flake8
+- **Docker Build**: Automated container builds
+- **Security Scanning**: Dependency vulnerability checks
+
+## 📁 Project Structure
+
+```
+Hypothesis_Test_ML_Pytest/
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml          # GitHub Actions workflow
+├── app/
+│   ├── __init__.py
+│   ├── main.py                # FastAPI application
+│   ├── ml_utils.py            # ML and statistical functions
+│   └── visualization.py       # Plotting utilities
+├── tests/
+│   ├── test_hypothesis.py     # Hypothesis testing tests
+│   └── test_model_eval.py     # Model evaluation tests
+├── .dockerignore              # Docker ignore file
+├── .gitignore                 # Git ignore file
+├── Dockerfile                 # Docker configuration
+├── Makefile                   # Build automation
+├── README.md                  # This file
+└── requirements.txt           # Python dependencies
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📊 Statistical Interpretation Guide
+
+### Understanding P-values
+
+- **p < 0.01**: Strong evidence against H₀ (highly significant)
+- **0.01 ≤ p < 0.05**: Moderate evidence against H₀ (significant)
+- **0.05 ≤ p < 0.10**: Weak evidence against H₀ (marginally significant)
+- **p ≥ 0.10**: Insufficient evidence against H₀ (not significant)
+
+### Common Interpretations
+
+- **Chi-squared Test**: Tests independence between categorical variables
+- **Correlation Tests**: Measure linear (Pearson) or monotonic (Spearman) relationships
+- **Normality Tests**: Assess if data follows normal distribution
+- **MANOVA**: Tests differences in multiple dependent variables simultaneously
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Scikit-learn](https://scikit-learn.org/) for machine learning algorithms
+- [FastAPI](https://fastapi.tiangolo.com/) for the amazing web framework
+- [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/) for the Wine dataset
+- [SciPy](https://scipy.org/) for statistical functions
+
+---
+
+**Built with ❤️ for the machine learning and statistics community**
