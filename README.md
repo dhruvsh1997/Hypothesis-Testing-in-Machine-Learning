@@ -1,0 +1,33 @@
+Wine Project FastAPI
+
+How to run
+
+1. create and activate a virtualenv
+   python -m venv venv
+   source venv/bin/activate
+
+2. install requirements
+   pip install -r requirements.txt
+
+3. start the app
+   uvicorn app.main:app --reload --port 8000
+
+4. Open docs
+   http://127.0.0.1:8000/docs
+
+Run tests
+   pytest -q
+
+
+API Input Examples
+Endpoint	Input JSON Example
+/train_model	json { "test_size": 0.2, "random_state": 42, "n_neighbors": 5 } 
+/evaluate_model	json { } 
+/feature_significance	json { "feature": "alcohol", "bins": 5 } 
+/feature_correlation	json { "f1": "alcohol", "f2": "color_intensity", "method": "pearson" } 
+/feature_normality	json { "feature": "residual_sugar" } 
+/model_vs_random	json { } 
+/feature_importance	json { } 
+/feature_combination	json { "features": ["alcohol", "color_intensity", "pH"] } 
+/feature_interaction	json { "f1": "alcohol", "f2": "color_intensity" } 
+/model_consistency	json { "n_splits": 5 } 
