@@ -1,0 +1,177 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+docs/
+*.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+.circleci/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+tests/
+test_*.py
+*_test.py
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+envHypothesisT/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# PyCharm
+.idea/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# Backup files
+*.bak
+*.backup
+
+# Security
+*.key
+*.pem
+.env
+.env.local
+.env.*.local
+.secrets/
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# ML/Data Science
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+data/
+models/
+checkpoints/
+*.npy
+*.npz
+
+# Generated content
+plots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Configuration
+config/local.yml
+config/production.yml
+
+# Package managers
+Pipfile*
+poetry.lock
+package-lock.json
+yarn.lock
+
+# Build tools
+Makefile
+setup.py
+setup.cfg
+pyproject.toml
+
+# Linting and formatting
+.flake8
+.pylintrc
+.black
+.isort.cfg
+.pre-commit-config.yaml
+
+# Performance and monitoring
+.locust/
+locustfile.py
+
+# Scripts
+scripts/
+*.sh
+*.bat
+
+# Kubernetes
+*.yaml
+*.yml
+manifests/
+
+# Terraform
+*.tf
