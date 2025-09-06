@@ -131,7 +131,7 @@ jobs:
       with:
         sarif_file: 'trivy-results.sarif'
 
-  # Integration Tests
+  # Integration Tests Case
   integration:
     runs-on: ubuntu-latest
     needs: [test]
