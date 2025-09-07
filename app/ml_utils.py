@@ -15,7 +15,7 @@ from sklearn.inspection import permutation_importance
 
 import numpy as np
 import pandas as pd
-from scipy.stats import chi2_contingency, pearsonr, spearmanr, shapiro, binom_test, f_oneway
+from scipy.stats import chi2_contingency, pearsonr, spearmanr, shapiro, binomtest, f_oneway
 from statsmodels.multivariate.manova import MANOVA
 from statsmodels.formula.api import ols
 import statsmodels.api as sm
@@ -191,7 +191,7 @@ def model_vs_random_test() -> Dict[str, Any]:
     n = int(len(y_test))
     # chance probability is 1 / n_classes
     p_chance = 1.0 / len(np.unique(DATA_STORE["y"]))
-    p_value = binom_test(successes, n=n, p=p_chance, alternative="greater")
+    p_value = binomtest(successes, n=n, p=p_chance, alternative="greater").pvalue
     result = "Reject H0" if p_value < 0.05 else "Fail to Reject H0"
     return {"accuracy": float(acc), "p_value": float(p_value), "result": result}
 
@@ -280,8 +280,7 @@ def feature_interaction_test(f1: str, f2: str) -> Dict[str, Any]:
 def model_consistency_tests(n_splits: int = 5, random_state: int = 42) -> Dict[str, Any]:
     """
     Test whether model performance differs across different random splits.
-    We perform repeated stratified splits, train KNN each time, and then perform one-way ANOVA
-    on accuracies to test consistency.
+    We perform repeated stratified splits, train KNN each time, and then report mean and std of accuracies.
     """
     X = DATA_STORE["X"]
     y = DATA_STORE["y"]
@@ -297,7 +296,11 @@ def model_consistency_tests(n_splits: int = 5, random_state: int = 42) -> Dict[s
         model.fit(Xtr, ytr)
         accs.append(accuracy_score(yts, model.predict(Xts)))
 
-    # ANOVA across folds
-    f_stat, p_val = f_oneway(*[[a] for a in accs])  # single-value groups still produce valid p
-    result = "Reject H0" if p_val < 0.05 else "Fail to Reject H0"
-    return {"accuracies": [float(a) for a in accs], "f_stat": float(f_stat), "p_value": float(p_val), "result": result}
+    mean_acc = float(np.mean(accs))
+    std_acc = float(np.std(accs))
+    return {
+        "accuracies": [float(a) for a in accs],
+        "mean_accuracy": mean_acc,
+        "std_accuracy": std_acc,
+        "result": "Consistent" if std_acc < 0.05 else "Variable"
+    }

@@ -9,7 +9,7 @@ All hypothesis endpoints are POST requests and inputs are validated via Pydantic
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, conint
 from typing import List, Optional, Literal
-from .ml_utils import (
+from ml_utils import (
     prepare_and_train,
     evaluate_model,
     single_feature_chi2,
