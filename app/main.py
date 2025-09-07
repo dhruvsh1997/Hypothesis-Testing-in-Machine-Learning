@@ -1,6 +1,6 @@
 """
 FastAPI application exposing endpoints for:
-- Training and evaluating a KNN classifier on the Wine dataset
+- Training and evaluating a KNN classifier on the Wine datasets
 - Running multiple hypothesis testing scenarios to validate statistical significance
 
 All hypothesis endpoints are POST requests and inputs are validated via Pydantic models.
