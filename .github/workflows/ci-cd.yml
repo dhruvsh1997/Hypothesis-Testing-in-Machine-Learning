@@ -1,15 +1,12 @@
 name: CI/CD Pipeline
-
 on:
   push:
     branches: [ master, develop ]
   pull_request:
     branches: [ master, develop ]
-
 env:
   PYTHON_VERSION: 3.9
   IMAGE_NAME: wine-hypothesis-api
-
 jobs:
   # Code Quality and Testing
   test:
@@ -44,9 +41,7 @@ jobs:
     
     - name: Lint with flake8
       run: |
-        # Stop build if there are Python syntax errors or undefined names
         flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
         flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
       continue-on-error: true
     
@@ -58,9 +53,9 @@ jobs:
       run: safety check --json --output safety-report.json
       continue-on-error: true
     
-    # - name: Run tests with pytest
-    #   run: |
-    #     pytest test*.py -v --cov=app --cov-report=xml --cov-report=html --cov-report=term
+    - name: Run tests with pytest
+      run: |
+        pytest test_hypothesis.py test_model_eval.py -v --cov=app --cov-report=xml --cov-report=html --cov-report=term
     
     - name: Upload test artifacts
       uses: actions/upload-artifact@v4
@@ -137,11 +132,19 @@ jobs:
     - name: Start API server
       run: |
         uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-        sleep 10
+        # Wait for server to be ready
+        for i in {1..30}; do
+          if curl -f http://localhost:8000/docs; then
+            echo "Server is running"
+            break
+          fi
+          echo "Waiting for server to start... ($i/30)"
+          sleep 2
+        done
     
     - name: Run integration tests
       run: |
-        pytest test*.py -v --maxfail=1
+        pytest test_hypothesis.py test_model_eval.py -v --maxfail=1
     
     - name: API Health Check
       run: |
@@ -171,7 +174,15 @@ jobs:
     - name: Start API server
       run: |
         uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-        sleep 10
+        # Wait for server to be ready
+        for i in {1..30}; do
+          if curl -f http://localhost:8000/docs; then
+            echo "Server is running"
+            break
+          fi
+          echo "Waiting for server to start... ($i/30)"
+          sleep 2
+        done
     
     - name: Run performance tests
       run: |
