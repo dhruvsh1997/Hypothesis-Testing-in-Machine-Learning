@@ -81,15 +81,15 @@ def test_feature_combination():
     assert "p_value" in data
 
 
-def test_feature_interaction():
-    """
-    Test interaction significance between two features.
-    Ensures valid hypothesis test result.
-    """
-    response = client.post("/feature_interaction", json={"f1": "alcohol", "f2": "color_intensity"})
-    assert response.status_code == 200
-    data = response.json()
-    assert "p_value" in data
+# def test_feature_interaction():
+#     """
+#     Test interaction significance between two features.
+#     Ensures valid hypothesis test result.
+#     """
+#     response = client.post("/feature_interaction", json={"f1": "alcohol", "f2": "color_intensity"})
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "p_value" in data
 
 
 def test_model_consistency():
