@@ -32,7 +32,6 @@ htmlcov/
 .nox/
 tests/
 test_*.py
-*_test.py
 
 # Virtual environments
 venv/
