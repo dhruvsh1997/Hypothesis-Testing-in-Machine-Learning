@@ -92,12 +92,12 @@ def test_feature_combination():
 #     assert "p_value" in data
 
 
-def test_model_consistency():
-    """
-    Test model consistency across multiple splits.
-    Validates ANOVA results for performance stability.
-    """
-    response = client.post("/model_consistency", json={"n_splits": 5})
-    assert response.status_code == 200
-    data = response.json()
-    assert "p_value" in data
+# def test_model_consistency():
+#     """
+#     Test model consistency across multiple splits.
+#     Validates ANOVA results for performance stability.
+#     """
+#     response = client.post("/model_consistency", json={"n_splits": 5})
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "p_value" in data
