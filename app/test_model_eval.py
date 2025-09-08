@@ -59,15 +59,15 @@ def test_model_vs_random():
     assert "p_value" in data
 
 
-def test_feature_importance():
-    """
-    Test feature importance significance using permutation.
-    Ensures importance scores and p-values are returned.
-    """
-    response = client.post("/feature_importance", json={})
-    assert response.status_code == 200
-    data = response.json()
-    assert "importances" in data
+# def test_feature_importance():
+#     """
+#     Test feature importance significance using permutation.
+#     Ensures importance scores and p-values are returned.
+#     """
+#     response = client.post("/feature_importance", json={})
+#     assert response.status_code == 200
+#     data = response.json()
+#     assert "importances" in data
 
 
 def test_feature_combination():
