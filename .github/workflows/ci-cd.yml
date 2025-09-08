@@ -9,6 +9,7 @@ env:
   IMAGE_NAME: wine-hypothesis-api
 
 jobs:
+  # Code Quality and Testing
   test:
     runs-on: ubuntu-latest
     strategy:
@@ -31,12 +32,6 @@ jobs:
         pip install -r requirements.txt
         pip install flake8 black isort pytest-cov bandit safety
     
-    - name: Create __init__.py files
-      run: |
-        touch app/__init__.py
-        touch app/ml_utils.py
-        touch app/visualization.py
-    
     - name: Code formatting check (Black)
       run: black --check --diff app/ test*.py
       continue-on-error: true
@@ -47,7 +42,9 @@ jobs:
     
     - name: Lint with flake8
       run: |
+        # Stop build if there are Python syntax errors or undefined names
         flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
         flake8 app/ --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
       continue-on-error: true
     
@@ -61,7 +58,6 @@ jobs:
     
     - name: Run tests with pytest
       run: |
-        export PYTHONPATH=$PYTHONPATH:$(pwd)
         pytest test*.py -v --cov=app --cov-report=xml --cov-report=html --cov-report=term
     
     - name: Upload test artifacts

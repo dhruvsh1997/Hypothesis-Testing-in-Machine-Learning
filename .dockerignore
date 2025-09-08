@@ -13,7 +13,6 @@ docs/
 # CI/CD
 .github/
 .gitlab-ci.yml
-.travis.yml
 Jenkinsfile
 .circleci/
 
