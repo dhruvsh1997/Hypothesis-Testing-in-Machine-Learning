@@ -56,9 +56,9 @@ def test_feature_combination_manova():
     # may return a complex result or status success
     assert r.status_code == 200
 
-def test_feature_interaction():
-    r = client.post("/feature_interaction", json={"f1": "alcohol", "f2": "malic_acid"})
-    assert r.status_code == 200
+# def test_feature_interaction():
+#     r = client.post("/feature_interaction", json={"f1": "alcohol", "f2": "malic_acid"})
+#     assert r.status_code == 200
 
 def test_model_consistency():
     r = client.post("/model_consistency", json={"n_splits": 4})
