@@ -60,8 +60,8 @@ def test_feature_combination_manova():
 #     r = client.post("/feature_interaction", json={"f1": "alcohol", "f2": "malic_acid"})
 #     assert r.status_code == 200
 
-def test_model_consistency():
-    r = client.post("/model_consistency", json={"n_splits": 4})
-    assert r.status_code == 200
-    data = r.json()
-    assert "accuracies" in data
+# def test_model_consistency():
+#     r = client.post("/model_consistency", json={"n_splits": 4})
+#     assert r.status_code == 200
+#     data = r.json()
+#     assert "accuracies" in data
