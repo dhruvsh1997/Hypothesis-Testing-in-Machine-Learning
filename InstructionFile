@@ -18,6 +18,18 @@ How to run
 Run tests
    pytest -q
 
+Hypothesis_Test_ML_Pytest
+|_.pytest_cache
+|_app
+   |_main.py
+   |_ml_utils.py
+   |_visualization.py
+   |_test_hypothesis.py
+   |_test_model_eval.py
+|_envHypothesisT
+|_ __pycache__
+|_README.md
+|_requirements.txt
 
 API Input Examples
 Endpoint	Input JSON Example
