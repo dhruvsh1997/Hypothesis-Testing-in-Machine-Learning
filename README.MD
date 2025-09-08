@@ -432,7 +432,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Scikit-learn](https://scikit-learn.org/) for machine learning algorithms
 - [FastAPI](https://fastapi.tiangolo.com/) for the amazing web framework
-- [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/) for the Wine dataset
+- [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/) for the Wines dataset
 - [SciPy](https://scipy.org/) for statistical functions
 
 ---
