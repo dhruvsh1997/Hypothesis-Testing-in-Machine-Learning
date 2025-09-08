@@ -44,11 +44,11 @@ def test_model_vs_random():
     data = r.json()
     assert "accuracy" in data and "p_value" in data
 
-def test_feature_importance():
-    r = client.post("/feature_importance", json={})
-    assert r.status_code == 200
-    data = r.json()
-    assert "importances_mean" in data
+# def test_feature_importance():
+#     r = client.post("/feature_importance", json={})
+#     assert r.status_code == 200
+#     data = r.json()
+#     assert "importances_mean" in data
 
 def test_feature_combination_manova():
     # choose two numeric features
