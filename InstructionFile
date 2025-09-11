@@ -31,7 +31,7 @@ Hypothesis_Test_ML_Pytest
 |_README.md
 |_requirements.txt
 
-API Input Examples
+APIs Input Examples
 Endpoint	Input JSON Example
 /train_model	json { "test_size": 0.2, "random_state": 42, "n_neighbors": 5 } 
 /evaluate_model	json { } 
