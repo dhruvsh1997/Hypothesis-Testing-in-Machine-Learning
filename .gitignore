@@ -6,7 +6,7 @@
 .env.production
 envHypothesisT/
 
-# Python
+# Python Related 
 __pycache__/
 *.py[cod]
 *$py.class
