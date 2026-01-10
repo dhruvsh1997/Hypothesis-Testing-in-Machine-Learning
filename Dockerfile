@@ -1,7 +1,7 @@
 # Use official Python runtime as base image
 FROM python:3.9-slim
 
-# Set metadata
+# Set metadatas
 LABEL maintainer="Wine Hypothesis Testing API"
 LABEL description="FastAPI application for wine classification with hypothesis testing"
 LABEL version="1.0.0"
