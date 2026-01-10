@@ -60,7 +60,7 @@ mindmap
         Spearman Correlation
       Normality Tests
         Shapiro-Wilk Test
-    Model Validation
+    Model Validations
       Binomial Test
         Model vs Random
         Performance Validation
