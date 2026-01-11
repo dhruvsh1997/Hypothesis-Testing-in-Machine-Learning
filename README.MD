@@ -51,7 +51,7 @@ flowchart TD
 ```mermaid
 mindmap
   root((Hypothesis Tests))
-    Feature Analysis
+    Features Analysis
       Chi-squared Test
         Independence test
         Feature vs Target
