@@ -6,7 +6,7 @@ LABEL maintainer="Wine Hypothesis Testing API"
 LABEL description="FastAPI application for wine classification with hypothesis testing"
 LABEL version="1.0.0"
 
-# Set environment variables
+# Set environment variable
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
