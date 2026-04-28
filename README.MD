@@ -15,7 +15,7 @@ This application serves as both a machine learning service and a statistical ana
 - **Machine Learning**: KNN classifier training and evaluation on the Wine dataset
 - **Hypothesis Testing**: Multiple statistical tests to validate ML assumptions and feature importance
 - **REST API**: Clean, documented endpoints for all operations
-- **Statistical Validation**: Comprehensive testing framework for model reliability
+- **Statistical Validations**: Comprehensive testing framework for model reliability
 
 ## 📊 Hypothesis Testing in Machine Learning
 
