@@ -6,7 +6,7 @@
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
 [![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=black)](https://docs.pytest.org)
 
-A comprehensive FastAPI application that combines machine learning with statistical hypothesis testing for wine classification. This project demonstrates how to train a K-Nearest Neighbors (KNN) classifier on the Wine dataset and perform various statistical tests to validate model performance and feature significance.
+A comprehensive FastAPI application that combines machine learning with statistical hypothesis testings for wine classification. This project demonstrates how to train a K-Nearest Neighbors (KNN) classifier on the Wine dataset and perform various statistical tests to validate model performance and feature significance.
 
 ## 🎯 Project Overview
 
